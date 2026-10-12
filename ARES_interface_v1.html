@@ -1,146 +1,446 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#050b16">
-<title>ARES AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARES | Assistente Pessoal</title>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <style>
-:root{--bg:#040914;--panel:#091426;--panel2:#0d1d32;--line:#173b59;--cyan:#52e8ff;--blue:#247bff;--text:#e4f4ff;--muted:#87a7c0;--green:#5affc5}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-body{height:100dvh}
-button,input{font:inherit}
-button{cursor:pointer;color:var(--cyan);background:#0b1a2b;border:1px solid #205071;border-radius:12px;padding:9px 12px}
-button:active{transform:scale(.98)}
-.app{height:100dvh;max-height:100dvh;display:grid;grid-template-rows:58px minmax(0,1fr) 60px;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#0a1c34 0%,#040914 62%)}
-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 5px;min-width:0}
-.brand{display:flex;align-items:center;gap:10px;min-width:0}.logo{width:38px;height:38px;border:1px solid var(--cyan);border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-weight:800;box-shadow:0 0 18px #00d9ff22}
-.brand strong{font-size:17px;letter-spacing:4px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2.5px;margin-top:1px}
-.status{font-size:10px;letter-spacing:1.2px;color:var(--green);white-space:nowrap}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px;box-shadow:0 0 10px var(--green)}
-.main{min-height:0;display:grid;grid-template-columns:minmax(210px,.8fr) minmax(260px,1.25fr) minmax(190px,.8fr);gap:8px;overflow:hidden}
-.panel{min-height:0;min-width:0;background:linear-gradient(160deg,#0b172aee,#071120f5);border:1px solid var(--line);border-radius:17px;overflow:hidden}
-.core{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;position:relative}
-.kicker{color:var(--cyan);font-size:10px;letter-spacing:3px;text-align:center}
-.reactor{width:min(38vh,210px,70%);aspect-ratio:1;position:relative;margin:10px 0;display:grid;place-items:center}
-.ring{position:absolute;border:1px solid #37dfff66;border-radius:50%;inset:0;animation:spin 16s linear infinite}.ring.r2{inset:10%;border:2px solid #237bff;animation-duration:9s;animation-direction:reverse}.ring.r3{inset:22%;border-style:dotted;animation-duration:22s}
-.bars{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:3px;opacity:.85}.bars i{display:block;width:3px;height:15%;border-radius:5px;background:linear-gradient(var(--cyan),var(--blue));transform-origin:center;box-shadow:0 0 8px #1edfff66}
-.idle-dots{position:absolute;inset:0;pointer-events:none}.idle-dots i{position:absolute;width:3px;height:3px;border-radius:50%;background:#ff5268;box-shadow:0 0 4px #ff173a33;opacity:.78}.bars{display:none}.reactor.is-speaking .bars{display:flex}.reactor.is-speaking .idle-dots{display:none}
-.orb{width:42%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 42% 35%,#b7ffff 0,#31d9ff 9%,#0788ec 30%,#06417e 65%,#06162d 100%);box-shadow:0 0 22px #14bfff99,0 0 52px #087eff44;z-index:2}
-.core h1{font-size:22px;letter-spacing:6px;margin:1px 0 5px;font-weight:500}.core p{font-size:12px;text-align:center;color:var(--muted);margin:3px 0 10px;max-width:250px;line-height:1.45}
-.primary{font-size:11px;padding:9px 11px;border-radius:999px}.microstatus{display:flex;gap:16px;margin-top:12px;text-align:center}.microstatus b{display:block;color:var(--cyan);font-size:11px;letter-spacing:1px}.microstatus span{display:block;color:var(--muted);font-size:8px;letter-spacing:1.5px;margin-top:3px}
-.chat{display:grid;grid-template-rows:42px minmax(0,1fr);min-height:0}
-.panelhead{display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--line);font-size:11px;font-weight:700;letter-spacing:1.4px;gap:8px}.panelhead small{color:var(--muted);font-size:9px;font-weight:400;letter-spacing:.5px}
-.chatbody{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;padding:10px;gap:8px}
-.messages{overflow:auto;min-height:0;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:#235477 transparent}
-.msg{border:1px solid #1a4562;background:#0d2035;border-radius:12px;padding:9px 10px;font-size:12px;line-height:1.45;overflow-wrap:anywhere}.msg .who{display:block;color:var(--cyan);font-size:9px;letter-spacing:1.7px;margin-bottom:4px}.msg.user{align-self:flex-end;background:#102a3c;max-width:90%}.msg.user .who{color:#91b8ff}
-.quick{display:flex;gap:5px;flex-wrap:wrap}.quick button{font-size:9px;padding:6px 8px;border-radius:999px;color:#a9d5ef}
-.context{display:grid;grid-template-rows:42px minmax(0,1fr);min-height:0}.contextbody{padding:10px;min-height:0;display:flex;flex-direction:column;gap:8px;overflow:hidden}.contextbody h3{font-size:13px;margin:0;color:var(--cyan);font-weight:600}.contextbody p{font-size:11px;line-height:1.45;color:#b8d0e2;margin:0;overflow:hidden}.contextbody img{width:100%;height:min(22vh,170px);object-fit:cover;border-radius:10px;border:1px solid var(--line);display:none}.tags{display:flex;flex-wrap:wrap;gap:5px}.tags span{font-size:9px;border:1px solid #205071;color:var(--muted);border-radius:20px;padding:4px 7px}
-.composer{display:flex;align-items:center;gap:7px;min-width:0}.composer input{flex:1;min-width:0;height:44px;background:#09182a;border:1px solid var(--line);border-radius:13px;padding:0 13px;color:var(--text);outline:none;font-size:13px}.composer input:focus{border-color:var(--cyan)}.composer button{height:44px;white-space:nowrap}.send{background:#07364a;border-color:#1c91b1}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:700px){
- .app{grid-template-rows:46px minmax(0,1fr) 48px;gap:6px;padding:6px 7px calc(6px + env(safe-area-inset-bottom))}
- header{padding:0 2px}.logo{width:31px;height:31px}.brand{gap:7px}.brand strong{font-size:14px;letter-spacing:3px}.brand small{font-size:7px;letter-spacing:1.5px}.status{font-size:8px;letter-spacing:.6px}
- .main{grid-template-columns: minmax(0,.88fr) minmax(0,1.12fr);grid-template-rows:minmax(0,1fr) minmax(0,.75fr);gap:6px}
- .core{grid-column:1;grid-row:1;padding:6px}.kicker{font-size:8px;letter-spacing:1.6px}.reactor{width:min(24vh,38vw,155px);margin:7px 0}.core h1{font-size:16px;letter-spacing:4px}.core p{font-size:10px;margin:2px 0 7px}.primary{font-size:9px;padding:7px 8px}.microstatus{gap:9px;margin-top:8px}.microstatus b{font-size:9px}.microstatus span{font-size:7px}
- .chat{grid-column:2;grid-row:1;grid-template-rows:35px minmax(0,1fr)}.panelhead{padding:0 8px;font-size:9px;letter-spacing:.7px}.panelhead small{font-size:7px}.chatbody{padding:7px;gap:5px}.msg{font-size:10px;padding:7px 8px;border-radius:9px}.msg .who{font-size:8px;margin-bottom:3px}.quick{gap:4px}.quick button{font-size:8px;padding:5px 6px}
- .context{grid-column:1 / -1;grid-row:2;grid-template-rows:32px minmax(0,1fr)}.contextbody{display:grid;grid-template-columns:90px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:4px 9px;padding:7px}.contextbody h3{grid-column:2;font-size:11px}.contextbody img{grid-column:1;grid-row:1 / span 2;height:100%;max-height:none;min-height:0;object-fit:cover}.contextbody p{grid-column:2;grid-row:2;font-size:10px;line-height:1.35}.tags{display:none}
- .composer{gap:5px}.composer input{height:42px;font-size:12px;padding:0 10px}.composer button{height:42px;padding:0 10px;font-size:11px}.listenBtn{width:43px;padding:0!important;font-size:17px!important}
+:root {
+  --red: #ff253f;
+  --bg: #08090d;
+  --panel: #11131b;
+  --muted: #8c91a3;
 }
-@media(max-height:700px) and (max-width:700px){
- .app{grid-template-rows:40px minmax(0,1fr) 43px;padding-top:4px;gap:4px}.main{grid-template-rows:minmax(0,1fr) minmax(0,.7fr)}.reactor{width:min(19vh,30vw,125px);margin:4px 0}.core p{margin-bottom:4px}.microstatus{margin-top:4px}.composer input,.composer button{height:38px}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #24101b 0%, var(--bg) 55%);
+  color: #f7f7fb;
+  font-family: Arial, sans-serif;
 }
-
-/* ARES: identidade preta e vermelha */
-:root{--bg:#050304;--panel:#100709;--panel2:#1b090d;--line:#5c1824;--cyan:#ff334f;--blue:#c20f2f;--text:#fff0f2;--muted:#c18a93;--green:#ff334f}
-.app{background:radial-gradient(ellipse at 50% 30%,#26070e 0%,#050304 64%)}
-.panel{background:linear-gradient(160deg,#16080bee,#090507f5);border-color:#5c1824}
-header{border-bottom-color:#5c1824}
-.logo{border-color:#ff334f;color:#ff334f;box-shadow:0 0 18px #ff173a33}
-.dot{background:#ff334f;box-shadow:0 0 10px #ff334f}
-.ring{border-color:#ff334f66;animation-play-state:paused}
-.reactor.is-speaking .ring{animation-play-state:running}
-.ring.r2{border-color:#ff2345}
-.ring.r3{border-color:#ff334f55}
-.bars i{background:linear-gradient(#ff8a9a,#d0002c);box-shadow:0 0 8px #ff173a66}
-.idle-dots i{background:#ff5268;box-shadow:0 0 4px #ff173a33}
-.orb{background:radial-gradient(circle at 42% 35%,#fff0f2 0,#ff6a7d 9%,#f0193c 30%,#8f0824 65%,#18040a 100%);box-shadow:0 0 22px #ff173a99,0 0 52px #d0002c44}
-button{color:#ff6378;background:#1b080d;border-color:#6b1b2b}
-.composer input{background:#10070a;border-color:#5c1824}
-.composer input:focus{border-color:#ff334f}
-.msg{border-color:#5c1824;background:#1a0b10}
-.msg.user{background:#260c13}
-.msg.user .who{color:#ff9aa8}
-.send{background:#4b0717;border-color:#bd1838;color:#fff0f2}
-.quick button{color:#ffc0c8;border-color:#5c1824}
-.contextbody img{border-color:#5c1824}
-.tags span{border-color:#5c1824}
-
+header {
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #ffffff12;
+}
+.logo { letter-spacing: 7px; color: var(--red); font-size: 23px; font-weight: 800; }
+.status { color: #9ba2b5; font-size: 12px; }
+main {
+  max-width: 850px;
+  margin: auto;
+  padding: 22px 16px 35px;
+}
+.core-area { text-align: center; padding: 12px 0 24px; }
+.core {
+  width: 155px;
+  height: 155px;
+  margin: 10px auto 18px;
+  position: relative;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle, #ff4a60 0%, #8c1229 28%, #1b0b15 65%, transparent 72%);
+  box-shadow: 0 0 35px #ff253f44, inset 0 0 22px #ff253f33;
+  animation: breathe 3s ease-in-out infinite;
+}
+.core::before, .core::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border: 1px solid #ff253f9c;
+  border-radius: 50%;
+  animation: orbit 9s linear infinite;
+}
+.core::after {
+  inset: -22px;
+  border-color: #ff253f55;
+  animation-duration: 14s;
+  animation-direction: reverse;
+}
+.core span { font-size: 30px; font-weight: bold; letter-spacing: 3px; }
+@keyframes breathe {
+  50% { transform: scale(1.055); filter: brightness(1.25); }
+}
+@keyframes orbit {
+  to { transform: rotate(360deg); }
+}
+.wave {
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+.wave i {
+  display: block;
+  height: 6px;
+  width: 3px;
+  border-radius: 8px;
+  background: var(--red);
+  animation: wave 0.8s ease-in-out infinite alternate;
+}
+.wave i:nth-child(3n) { animation-delay: -.4s; }
+.wave i:nth-child(2n) { animation-delay: -.2s; }
+@keyframes wave {
+  to { height: 24px; opacity: .5; }
+}
+h1 { font-size: 25px; margin: 8px 0; }
+.subtitle { color: var(--muted); font-size: 14px; }
+.panel {
+  background: #11131bdd;
+  border: 1px solid #ffffff12;
+  border-radius: 18px;
+  padding: 16px;
+  margin-top: 16px;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 9px; }
+button {
+  border: 1px solid #ffffff1b;
+  background: #1c1f2a;
+  color: white;
+  padding: 11px 14px;
+  border-radius: 11px;
+  cursor: pointer;
+  font-weight: 600;
+}
+button:hover { border-color: var(--red); }
+button.primary { background: var(--red); color: white; border-color: var(--red); }
+#chat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 130px;
+  max-height: 350px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+.msg {
+  padding: 12px 14px;
+  border-radius: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.user { background: #32202a; align-self: flex-end; max-width: 88%; }
+.ares { background: #1a1d28; border-left: 2px solid var(--red); align-self: flex-start; max-width: 95%; }
+.composer { display: flex; gap: 8px; }
+input {
+  min-width: 0;
+  flex: 1;
+  background: #090a10;
+  border: 1px solid #303341;
+  color: white;
+  border-radius: 12px;
+  padding: 13px;
+  font-size: 15px;
+}
+input:focus { outline: 1px solid var(--red); }
+.small { color: var(--muted); font-size: 12px; line-height: 1.5; }
+#emails { margin-top: 12px; }
+.email {
+  padding: 12px 0;
+  border-bottom: 1px solid #ffffff12;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.email button { margin-top: 8px; padding: 8px 10px; }
+footer { text-align: center; color: #686e80; padding: 20px; font-size: 11px; }
+@media (max-width: 500px) {
+  header { padding: 17px; }
+  .logo { font-size: 19px; }
+  .composer { flex-wrap: wrap; }
+  .composer input { flex-basis: 100%; }
+  .core { width: 135px; height: 135px; }
+}
 </style>
 </head>
+
 <body>
-<div class="app">
 <header>
- <div class="brand"><div class="logo">A</div><div><strong>ARES <span style="color:var(--cyan)">AI</span></strong><small>PERSONAL INTELLIGENCE</small></div></div>
- <div class="status"><span class="dot"></span><span id="online">SISTEMA PRONTO</span></div>
+  <div class="logo">ARES</div>
+  <div class="status" id="status">● SISTEMA INICIALIZADO</div>
 </header>
-<main class="main">
- <section class="panel core">
-  <div class="kicker">NEURAL INTERFACE / 01</div>
-  <div class="reactor" id="reactor"><div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div><div class="idle-dots" id="idleDots" aria-hidden="true"></div><div class="bars" id="bars"></div><div class="orb"></div></div>
-  <h1>ARES</h1><p id="coreStatus">Núcleo em espera. Ative a escuta ou digite sua mensagem.</p>
-  <button class="primary" id="listen">🎙 ATIVAR ESCUTA</button>
-  <div class="microstatus"><div><b>GEMINI</b><span>MODELO</span></div><div><b id="clock">--:--</b><span>HORA LOCAL</span></div><div><b id="voiceState">READY</b><span>ÁUDIO</span></div></div>
- </section>
- <section class="panel chat">
-  <div class="panelhead"><span>TERMINAL</span><small id="linkState">AGUARDANDO SERVIDOR</small></div>
-  <div class="chatbody"><div class="messages" id="messages"><div class="msg"><span class="who">ARES / SISTEMA</span>Interface pronta. Para conversar com o Gemini, inicie o servidor e abra esta página pelo endereço local dele. Enquanto isso, você pode testar o campo de texto e a escuta do navegador.</div></div>
-   <div class="quick"><button data-prompt="Me conte uma curiosidade científica.">Curiosidade</button><button data-prompt="Ative seu modo sarcástico, sem exagerar.">Modo sarcástico</button></div>
-  </div>
- </section>
- <section class="panel context">
-  <div class="panelhead"><span>CONTEXTO VISUAL</span><small>AO VIVO</small></div>
-  <div class="contextbody"><img id="contextImage" alt="Imagem relacionada ao assunto"><h3 id="contextTitle">Aguardando assunto</h3><p id="contextText">Quando você fizer uma pergunta, este painel poderá mostrar um resumo e uma imagem relacionada ao tema.</p><div class="tags" id="tags"><span>VISÃO</span><span>CONTEXTO</span><span>INFORMAÇÃO</span></div></div>
- </section>
+
+<main>
+  <section class="core-area">
+    <div class="core"><span>A</span></div>
+    <div class="wave" id="wave"></div>
+    <h1>Seu assistente pessoal</h1>
+    <p class="subtitle">Inteligência • Voz • Produtividade</p>
+  </section>
+
+  <section class="panel">
+    <div id="chat">
+      <div class="msg ares">Olá. Eu sou o ARES. Estou pronto para receber suas instruções.</div>
+    </div>
+    <div class="composer">
+      <input id="prompt" placeholder="Fale comigo, dê uma tarefa..." autocomplete="off">
+      <button id="mic">🎙️</button>
+      <button class="primary" id="send">Enviar ➤</button>
+    </div>
+    <p class="small">A conversa será enviada ao servidor configurado para gerar respostas da IA.</p>
+  </section>
+
+  <section class="panel">
+    <h3>Conexões</h3>
+    <div class="actions">
+      <button class="primary" id="gmailConnect">✉ Conectar Gmail</button>
+      <button id="readMail" disabled>Ver e-mails recentes</button>
+      <button id="speakToggle">🔊 Voz ativada</button>
+    </div>
+    <div id="gmailStatus" class="small" style="margin-top:12px">
+      O Gmail ainda não está conectado.
+    </div>
+    <div id="emails"></div>
+  </section>
+
+  <section class="panel">
+    <h3>Configuração</h3>
+    <p class="small">
+      O endereço do servidor da IA e o ID OAuth do Google são configurados no código.
+      A chave secreta da IA fica exclusivamente no servidor, nunca neste HTML.
+    </p>
+  </section>
 </main>
-<form class="composer" id="form"><button type="button" class="listenBtn" id="mic" title="Ativar escuta">🎙</button><input id="input" autocomplete="off" placeholder="Fale ou digite uma mensagem..." aria-label="Mensagem"><button class="send" type="submit">ENVIAR ➤</button></form>
-</div>
+
+<footer>ARES • PROJETO PESSOAL EM TESTES</footer>
+
 <script>
-const $=s=>document.querySelector(s);
-const bars=$('#bars'), reactor=$('#reactor'), idleDots=$('#idleDots');
-for(let i=0;i<64;i++){const b=document.createElement('i');b.style.transform=`rotate(${i*5.625}deg) translateY(-${Math.min(48,Math.max(30,Math.sin(i*.6)*9+38))}px)`;bars.appendChild(b)}
-function layoutIdleDots(){idleDots.replaceChildren();const size=reactor.clientWidth;const radius=size*.45;for(let i=0;i<88;i++){const dot=document.createElement('i');const a=(Math.PI*2*i/88)-(Math.PI/2);dot.style.left=(size/2+Math.cos(a)*radius-1.5)+'px';dot.style.top=(size/2+Math.sin(a)*radius-1.5)+'px';idleDots.appendChild(dot)}}
-let listening=false,recognition=null,audioCtx=null,analyser=null,animFrame=0;
-function setStatus(t){$('#coreStatus').textContent=t}
-function addMsg(text,who='ARES / SISTEMA',user=false){const el=document.createElement('div');el.className='msg'+(user?' user':'');const label=document.createElement('span');label.className='who';label.textContent=who;el.append(label,document.createTextNode(text));$('#messages').appendChild(el);$('#messages').scrollTop=$('#messages').scrollHeight;return el}
-function animateBars(active){cancelAnimationFrame(animFrame);reactor.classList.toggle('is-speaking',active);const bs=[...bars.children];if(!active){bs.forEach(b=>{b.style.height='8%';b.style.opacity='.5'});return}function draw(){bs.forEach((b,i)=>{const n=Math.random()*0.8+0.25;b.style.height=(8+n*55)+'%';b.style.opacity='1'});animFrame=requestAnimationFrame(draw)}draw()}
-function setupAudio(data){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const src=audioCtx.createMediaElementSource(data);analyser=audioCtx.createAnalyser();analyser.fftSize=128;src.connect(analyser);analyser.connect(audioCtx.destination);const arr=new Uint8Array(analyser.frequencyBinCount);function draw(){analyser.getByteFrequencyData(arr);[...bars.children].forEach((b,i)=>{const v=arr[i%arr.length]/255;b.style.height=(8+v*62)+'%';b.style.opacity=.45+v*.55});if(!data.paused)requestAnimationFrame(draw)}draw()}catch(e){animateBars(true)}}
-async function speak(text){if(!$('#voiceState'))return;$('#voiceState').textContent='SPEAK';setStatus('Respondendo em voz...');animateBars(true);
- try{const r=await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice:'Algenib'})});if(!r.ok)throw Error('TTS indisponível');const d=await r.json();if(d.audio){const a=new Audio(d.audio.startsWith('data:')?d.audio:'data:audio/wav;base64,'+d.audio);setupAudio(a);a.onended=()=>{animateBars(false);$('#voiceState').textContent='READY';setStatus('SISTEMA PRONTO');if(listening)startListening()};await a.play();return}}
- catch(e){}
- if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='pt-BR';u.onend=()=>{animateBars(false);$('#voiceState').textContent='READY';setStatus('SISTEMA PRONTO');if(listening)startListening()};speechSynthesis.speak(u)}else{animateBars(false);$('#voiceState').textContent='READY'}
+/* =========================================================
+   CONFIGURAÇÃO — PREENCHA ESTES CAMPOS
+   ========================================================= */
+
+// 1. COLOQUE A URL DO SEU SERVIDOR DA IA AQUI.
+// Exemplo: https://seu-servidor.exemplo.com
+const BACKEND_URL = "COLOQUE_A_URL_DO_SEU_SERVIDOR_AQUI";
+
+// 2. COLOQUE O ID DO CLIENTE OAUTH DO GOOGLE AQUI.
+// Ele termina normalmente em .apps.googleusercontent.com
+const GOOGLE_CLIENT_ID = "COLOQUE_SEU_CLIENT_ID_DO_GOOGLE_AQUI";
+
+// A chave secreta da API da IA NÃO vai neste arquivo.
+
+const $ = id => document.getElementById(id);
+let googleTokenClient = null;
+let gmailToken = null;
+let speakEnabled = true;
+let selectedEmail = null;
+let emailList = [];
+
+const chat = $("chat");
+const promptInput = $("prompt");
+
+for (let i = 0; i < 43; i++) {
+  const bar = document.createElement("i");
+  bar.style.animationDelay = `${-(i % 9) * 0.11}s`;
+  $("wave").appendChild(bar);
 }
-async function contextualize(q){$('#contextTitle').textContent=q.length>42?q.slice(0,42)+'…':q;$('#contextText').textContent='Buscando informações relacionadas…';$('#contextImage').style.display='none';
- try{const url='https://pt.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q);const r=await fetch(url);if(!r.ok)throw Error();const d=await r.json();$('#contextTitle').textContent=d.title||q;$('#contextText').textContent=d.extract||'Não encontrei um resumo para este assunto.';if(d.thumbnail?.source){$('#contextImage').src=d.thumbnail.source;$('#contextImage').style.display='block'}}catch(e){$('#contextText').textContent='O painel contextual precisa de conexão com a internet e pode não encontrar uma página para toda pergunta.'}}
-async function sendMessage(text){text=text.trim();if(!text)return;addMsg(text,'VOCÊ',true);$('#input').value='';contextualize(text);setStatus('PROCESSANDO');$('#linkState').textContent='CONECTANDO…';
- try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});if(!r.ok)throw Error('Servidor não respondeu');const d=await r.json();const answer=d.text||d.response||d.reply||'Não recebi uma resposta do servidor.';addMsg(answer,'ARES / IA');$('#linkState').textContent='GEMINI LINK ATIVO';setStatus('RESPOSTA RECEBIDA');if($('#voiceToggle')?.checked!==false)await speak(answer);else{setStatus('SISTEMA PRONTO');if(listening)startListening()}}
- catch(e){addMsg('Não consegui acessar /api/chat. O arquivo foi aberto diretamente; inicie o servidor Node e abra o endereço local (por exemplo, http://localhost:3000) para ativar o Gemini.','ARES / CONEXÃO');$('#linkState').textContent='SERVIDOR NÃO CONECTADO';setStatus('MODO INTERFACE')}
+
+function addMessage(text, who = "ares") {
+  const item = document.createElement("div");
+  item.className = "msg " + who;
+  item.textContent = text;
+  chat.appendChild(item);
+  chat.scrollTop = chat.scrollHeight;
+  return item;
 }
-$('#form').addEventListener('submit',e=>{e.preventDefault();sendMessage($('#input').value)});
-document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>sendMessage(b.dataset.prompt)));
-async function startListening(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){setStatus('DITADO NÃO SUPORTADO — TENTE UM SITE HTTPS');return}
-try{
- if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){const stream=await navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(t=>t.stop())}
- recognition=new SR();recognition.lang='pt-BR';recognition.continuous=false;recognition.interimResults=true;
- recognition.onresult=e=>{let final='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)final+=t;else $('#input').value=t}if(final){$('#input').value='';sendMessage(final)}};
- recognition.onerror=e=>{if(listening){setStatus(e.error==='not-allowed'?'MICROFONE BLOQUEADO — ABRA AS PERMISSÕES DO CHROME':'FALHA NO MICROFONE: '+e.error);$('#voiceState').textContent='MIC ERROR';if(e.error==='not-allowed')listening=false}};
- recognition.onend=()=>{if(listening){setTimeout(()=>{if(listening&&!('speechSynthesis'in window&&speechSynthesis.speaking))startListening()},900)}else{$('#listen').textContent='🎙 ATIVAR ESCUTA';setStatus('NÚCLEO EM ESPERA')}};
- recognition.start();$('#listen').textContent='■ PARAR ESCUTA';setStatus('ESCUTANDO — PODE FALAR');$('#voiceState').textContent='LISTEN'
-}catch(e){setStatus(location.protocol==='content:'?'ARQUIVO LOCAL: MICROFONE PODE SER BLOQUEADO. ABRA EM UM SITE HTTPS.':'MICROFONE BLOQUEADO — VERIFIQUE AS PERMISSÕES');$('#voiceState').textContent='MIC ERROR'}
+
+function speak(text) {
+  if (!speakEnabled || !("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "pt-BR";
+  utterance.rate = 1;
+  speechSynthesis.speak(utterance);
 }
-function stopListening(){listening=false;try{recognition&&recognition.stop()}catch(e){}$('#listen').textContent='🎙 ATIVAR ESCUTA';$('#voiceState').textContent='READY';setStatus('NÚCLEO EM ESPERA')}
-function toggleListen(){if(listening)stopListening();else{listening=true;startListening()}}
-$('#listen').addEventListener('click',toggleListen);$('#mic').addEventListener('click',toggleListen);
-function clock(){const d=new Date();$('#clock').textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}clock();setInterval(clock,1000);layoutIdleDots();window.addEventListener('resize',layoutIdleDots);animateBars(false);
+
+async function sendMessage() {
+  const question = promptInput.value.trim();
+  if (!question) return;
+
+  promptInput.value = "";
+  addMessage(question, "user");
+
+  const loading = addMessage("Processando sua solicitação...", "ares");
+  $("status").textContent = "● PROCESSANDO";
+
+  try {
+    if (BACKEND_URL.startsWith("COLOQUE_")) {
+      throw new Error("Configure a URL do servidor no código primeiro.");
+    }
+
+    const response = await fetch(BACKEND_URL.replace(/\/$/, "") + "/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: question,
+        emailContext: selectedEmail
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Erro no servidor.");
+
+    loading.textContent = data.reply || "Não recebi uma resposta da IA.";
+    speak(loading.textContent);
+  } catch (error) {
+    loading.textContent = "Não consegui conectar à IA: " + error.message;
+  } finally {
+    $("status").textContent = "● SISTEMA PRONTO";
+  }
+}
+
+$("send").addEventListener("click", sendMessage);
+promptInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMessage();
+});
+
+$("mic").addEventListener("click", () => {
+  const SpeechRecognition = window.SpeechRecognition ||
+                            window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    addMessage("O reconhecimento de voz não está disponível neste navegador. Tente um navegador compatível.", "ares");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "pt-BR";
+  recognition.interimResults = false;
+  recognition.onstart = () => $("status").textContent = "● OUVINDO";
+  recognition.onresult = event => {
+    promptInput.value = event.results[0][0].transcript;
+    sendMessage();
+  };
+  recognition.onerror = () => $("status").textContent = "● SISTEMA PRONTO";
+  recognition.onend = () => $("status").textContent = "● SISTEMA PRONTO";
+  recognition.start();
+});
+
+$("speakToggle").addEventListener("click", () => {
+  speakEnabled = !speakEnabled;
+  $("speakToggle").textContent = speakEnabled ? "🔊 Voz ativada" : "🔇 Voz desativada";
+  if (!speakEnabled && "speechSynthesis" in window) speechSynthesis.cancel();
+});
+
+// O botão de Gmail só funciona após configurar o ID OAuth.
+function initGoogleAuth() {
+  if (!window.google?.accounts?.oauth2) {
+    setTimeout(initGoogleAuth, 500);
+    return;
+  }
+
+  if (GOOGLE_CLIENT_ID.startsWith("COLOQUE_")) {
+    $("gmailStatus").textContent =
+      "Configure GOOGLE_CLIENT_ID no código e ative a Gmail API no Google Cloud.";
+    return;
+  }
+
+  googleTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: "https://www.googleapis.com/auth/gmail.readonly",
+    callback: result => {
+      if (result.error) {
+        $("gmailStatus").textContent = "Não foi possível autorizar o Gmail.";
+        return;
+      }
+      gmailToken = result.access_token;
+      $("gmailStatus").textContent = "Gmail conectado nesta sessão.";
+      $("readMail").disabled = false;
+    }
+  });
+}
+
+$("gmailConnect").addEventListener("click", () => {
+  if (!googleTokenClient) {
+    $("gmailStatus").textContent =
+      "Configure primeiro o ID OAuth do Google e recarregue a página.";
+    return;
+  }
+  googleTokenClient.requestAccessToken();
+});
+
+$("readMail").addEventListener("click", loadEmails);
+
+async function loadEmails() {
+  if (!gmailToken) return;
+  $("emails").textContent = "Carregando e-mails...";
+
+  try {
+    const listResponse = await fetch(
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5",
+      { headers: { Authorization: "Bearer " + gmailToken } }
+    );
+    if (!listResponse.ok) throw new Error("Falha ao consultar a caixa de entrada.");
+
+    const list = await listResponse.json();
+    emailList = [];
+
+    for (const item of (list.messages || [])) {
+      const res = await fetch(
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${item.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date`,
+        { headers: { Authorization: "Bearer " + gmailToken } }
+      );
+      if (!res.ok) continue;
+      const mail = await res.json();
+      const headers = mail.payload?.headers || [];
+      const getHeader = name =>
+        headers.find(h => h.name.toLowerCase() === name.toLowerCase())?.value || "";
+
+      emailList.push({
+        id: item.id,
+        subject: getHeader("Subject") || "(Sem assunto)",
+        from: getHeader("From") || "Remetente desconhecido",
+        date: getHeader("Date") || "",
+        snippet: mail.snippet || ""
+      });
+    }
+
+    $("emails").replaceChildren();
+
+    if (!emailList.length) {
+      $("emails").textContent = "Nenhum e-mail recente encontrado.";
+      return;
+    }
+
+    emailList.forEach((mail, index) => {
+      const card = document.createElement("div");
+      card.className = "email";
+
+      const details = document.createElement("div");
+      details.textContent =
+        `${mail.subject}\nDe: ${mail.from}\n${mail.date}\n${mail.snippet}`;
+
+      const button = document.createElement("button");
+      button.textContent = "Usar este e-mail no chat";
+      button.addEventListener("click", () => {
+        selectedEmail = {
+          subject: mail.subject,
+          from: mail.from,
+          snippet: mail.snippet
+        };
+        addMessage(
+          `E-mail selecionado: ${mail.subject}. Você pode perguntar sobre ele agora.`,
+          "ares"
+        );
+        promptInput.focus();
+      });
+
+      card.append(details, button);
+      $("emails").appendChild(card);
+    });
+  } catch (error) {
+    $("emails").textContent = error.message;
+  }
+}
+
+window.addEventListener("load", initGoogleAuth);
 </script>
-</body></html>
+</body>
+</html>
